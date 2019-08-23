@@ -69,8 +69,36 @@ class Application extends Config {
      */
     public function actionFormSubmit($data) {
 
-        $errors = [];                                  //Отсутствие ошибок
+        //Парсим входной массив//
+        $parseData = [];
+        foreach ($data as $item) {
+            $parseData[$item['name']] = $item['value'];
+        }
+       
+        $errors = [];
 
+        // Валидация формы //
+        if (!preg_match('/^[a-zA-Zа-яёА-ЯЁ\s\-]{2,64}+$/', $parseData['name'])) {
+            $errors['name'] = 'Имя указано неправильно';
+        }
+
+        if (!preg_match("/^(?:[a-z0-9]+(?:[-_.]?[a-z0-9]+)?@[a-z0-9_.-]+(?:\.?[a-z0-9]+)?\.[a-z]{2,5})$/i", $parseData['email'])) {
+            $errors['email'] = 'Email указан неправильно';
+        }
+
+        if (!preg_match('/^\+380\(\d{2}\)\d{3}\-\d{2}\-\d{2}$/', $parseData['phone'])) {
+            $errors['phone'] = 'Неправильно указан номер телефона';
+        }
+
+        if (!preg_match('/^\s*([^\s]\s*){0,1024}$/', $parseData['comment'])) {
+            $errors['comment'] = 'Поле слишком длинное';
+        }
+
+        if($parseData['comment'] != strip_tags($parseData['comment'])) {
+            $errors['comment'] = 'Поле содержит html теги';
+        }
+
+        
         return ['result' => count($errors) === 0, 'error' => $errors];
     }
 
