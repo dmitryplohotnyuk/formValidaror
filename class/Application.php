@@ -76,15 +76,24 @@ class Application extends Config {
         foreach ($data as $item) {
             switch ($item['name']) {
                 case 'name':
-                    $pattern = '/^[a-zA-Zа-яёА-ЯЁ\s\-]{2,64}+$/';
-                    if (!preg_match($pattern, $item['value'])) {
-                        $errors['name'] = 'Name is incorrect';
+                    if (!empty($item['value'])) {
+                        if (ctype_digit($item['value'])) {
+                            $errors['name'] = 'The field contains numbers';
+                        }
+                        if (strlen($item['value']) > 64) {
+                            $errors['name'] = 'String is too long';
+                        }
+                    } else {
+                        $errors['name'] = 'Field is required';
                     }
                     break;
                 case 'email':
-                    $pattern = '/^(?:[a-z0-9]+(?:[-_.]?[a-z0-9]+)?@[a-z0-9_.-]+(?:\.?[a-z0-9]+)?\.[a-z]{2,5})$/i';
-                    if (!preg_match($pattern, $item['value'])) {
-                        $errors['email'] = 'Email is incorrect';
+                    if (!empty($item['value'])) {
+                        if (!filter_var($item['value'], FILTER_VALIDATE_EMAIL)) {
+                            $errors['email'] = 'Email is incorrect';
+                        }
+                    } else {
+                        $errors['email'] = 'Field is required';
                     }
                     break;
                 case 'phone':
@@ -97,12 +106,11 @@ class Application extends Config {
                     }
                     break;
                 case 'comment':
-                    $pattern = '/^\s*([^\s]\s*){0,1024}$/';
-                    if (!preg_match($pattern, $item['value'])) {
-                        $errors['comment'] = 'The field is too long';
-                    }
                     if ($item['value'] != strip_tags($item['value'])) {
-                            $errors['comment'] = 'The field contains html tags';
+                        $errors['comment'] = 'The field contains html tags';
+                    }
+                    if (strlen($item['value']) > 1024) {
+                        $errors['comment'] = 'String is too long';
                     }
                     break;    
             }
